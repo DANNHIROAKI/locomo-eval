@@ -162,6 +162,18 @@ uv run python scripts/run_memory_lancedb_pro.py \
 
 Both runs write artifacts under `outputs/` by default.
 
+## Sample Results
+
+The latest summaries under [`outputs/`](/Users/prrao/code/locomo-eval/outputs) show the following picture for recent `--limit 10` runs:
+
+| Backend | Rows | Correct | Wrong | Completion Rate | Avg latency (s) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `memory-core` | 50 | 27 | 23 | 0.54 | 6.7 |
+| `memory-lancedb` | 50 | 32 | 18 | 0.64 | 4.1 |
+| `memory-lancedb-pro` | 50 | 36 | 14 | 0.72 |  10.9 |
+
+Source summaries are from the output files after running the benchmark using each memory plugin.
+
 ### 9. Large-scale runs: prebuild the stores once, then benchmark in query-only mode
 
 For real benchmark runs, repeatedly ingesting the same corpus is wasteful. The recommended workflow is:
