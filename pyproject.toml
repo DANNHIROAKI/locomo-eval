@@ -1,0 +1,12 @@
+[project]
+name = "locomo-eval"
+version = "0.1.0"
+description = "Minimal LOCOMO benchmark harness for OpenClaw"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "lancedb>=0.10.0",
+  "openai>=1.66.0",
+  "python-dotenv>=1.2.2",
+  "requests>=2.32.3",
+]
