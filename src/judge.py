@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import os
 import json
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from dotenv import load_dotenv
@@ -117,15 +117,7 @@ Respond with JSON only:
 {{"is_correct":"CORRECT or WRONG","reasoning":"one short sentence"}}
 """.strip()
 
-    response = client.chat.completions.create(
-        model=model,
-        temperature=0,
-        response_format={"type": "json_object"},
-        messages=[
-            {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-        ],
-    )
+    response = _request_judge_completion(client, model, prompt)
     content = response.choices[0].message.content or "{}"
     data = _extract_json(content)
     is_correct = str(data.get("is_correct", "WRONG")).strip().upper() == "CORRECT"
@@ -141,6 +133,42 @@ Respond with JSON only:
         response=result.response,
         error=result.error,
     )
+
+
+def _request_judge_completion(client: OpenAI, model: str, prompt: str):
+    request = {
+        "model": model,
+        "temperature": 0,
+        "messages": [
+            {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ],
+    }
+
+    try:
+        return client.chat.completions.create(
+            response_format={"type": "json_object"},
+            **request,
+        )
+    except Exception as exc:
+        if not _looks_like_response_format_error(exc):
+            raise
+        return client.chat.completions.create(**request)
+
+
+def _looks_like_response_format_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    hints = (
+        "response_format",
+        "json_object",
+        "json schema",
+        "structured output",
+        "not supported",
+        "unsupported",
+        "invalid parameter",
+        "unknown parameter",
+    )
+    return any(hint in message for hint in hints)
 
 
 def _extract_json(content: str) -> dict[str, object]:
